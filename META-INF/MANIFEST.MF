@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Asciidoctor
+Bundle-SymbolicName: net.enilink.docs
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: net.enilink.docs,
+ org.asciidoctor
+Bundle-ClassPath: .,
+ lib/asciidoctor-java-integration-0.1.4.jar,
+ lib/guava-14.0.1.jar,
+ lib/jcommander-1.30.jar,
+ lib/jruby-complete-1.7.4.jar,
+ lib/jsoup-1.7.2.jar,
+ lib/xml-matchers-1.0-RC1.jar
+Import-Package: org.eclipse.core.runtime;version="3.4.0",
+ org.osgi.framework
