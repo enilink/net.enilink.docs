@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="net.enilink.docs" basedir=".">
+
+  	<dirname property="self" file="${ant.file.net.enilink.docs}"/>
+		
+	<path id="my-classpath">
+		<fileset dir="${self}/lib/">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="output" />
+	</target>
+
+	<target name="compile" depends="clean">
+		<mkdir dir="${self}/dist/classes" />
+		<javac includeantruntime="false" srcdir="${self}/src/main/java" destdir="${self}/dist/classes">
+		    <include name="net/enilink/docs/ant/*.java"/>
+			<classpath refid="my-classpath" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="${self}/dist/jar" />
+		<jar destfile="${self}/dist/jar/docs.jar" basedir="${self}/dist/classes" />
+	</target>
+
+	<target name="generate" depends="jar">
+		<!-- I did not implement an ant task, because of the fact that classloader 
+			problems occurred when running a respective proof-of-concept ant task -->
+		<java classname="net.enilink.docs.ant.Generator">
+			<classpath refid="my-classpath" />
+			<classpath>
+				<pathelement location="${self}/dist/jar/docs.jar" />
+			</classpath>
+			<arg value="docs" />
+			<arg value="output" />
+			<arg value="resources" />
+		</java>
+		<copy todir="output/assets">
+			<fileset dir="resources/assets" />
+		</copy>
+	</target>
+</project>
