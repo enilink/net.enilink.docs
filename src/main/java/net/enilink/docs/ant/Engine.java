@@ -12,12 +12,16 @@ import org.asciidoctor.Options;
 import org.asciidoctor.Placement;
 
 public class Engine {
-	private final Asciidoctor engine = Asciidoctor.Factory.create();
 	private final Attributes attributes = attributes().docType("book")
 			.backend("html5").showTitle(true).skipFrontMatter(false)
 			.tableOfContents(Placement.TOP).tableOfContents(true)
 			.sectionNumbers(true).get();
 	private final Options options = options().attributes(attributes).get();
+	private final Asciidoctor engine;
+
+	public Engine(IAsciidoctorFactory factory) {
+		this.engine = factory.create();
+	}
 
 	public String render(File input) {
 		return engine.renderFile(input, options);

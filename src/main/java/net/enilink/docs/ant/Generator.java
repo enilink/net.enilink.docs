@@ -9,8 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import net.enilink.docs.ant.model.Entry;
 import net.enilink.docs.ant.model.Node;
+import net.enilink.docs.ant.model.Options;
 
 import org.asciidoctor.DocumentHeader;
 import org.stringtemplate.v4.ST;
@@ -40,49 +40,22 @@ public class Generator {
 		}
 	};
 
-	class Options extends Entry {
-		public String contents;
-
-		public Options(String title, String path, String contents) {
-			super(title, path);
-			this.contents = contents;
-		}
-
-		public String getRootPath() {
-			StringBuilder sb = new StringBuilder();
-			Path parentPath = Paths.get(path).getParent();
-			if (!parentPath.equals(outputPath)) {
-				Path relative = outputPath.relativize(parentPath);
-				for (int i = 0; i < relative.getNameCount(); i++) {
-					sb.append("../");
-				}
-			}
-			return sb.toString();
-		}
-
-		public String getIndexPath() {
-			if (!"index.html".equals(outputPath.relativize(Paths.get(path))
-					.toString())) {
-				return getRootPath() + "index.html";
-			}
-			return null;
-		}
-	}
-
-	private Engine engine = new Engine();
-
+	private final Engine engine;
 	private final Path outputPath;
 	private final Path inputPath;
 	private final Path resourcesPath;
 
 	public static void main(String[] args) {
-		new Generator(args[0], args[1], args[2]).generate();
+		new Generator(args[0], args[1], args[2],
+				new DefaultAsciidcotorFactory()).generate();
 	}
 
-	public Generator(String inputDir, String outputDir, String resourceDir) {
+	public Generator(String inputDir, String outputDir, String resourceDir,
+			IAsciidoctorFactory factory) {
 		this.inputPath = Paths.get(inputDir);
 		this.outputPath = Paths.get(outputDir);
 		this.resourcesPath = Paths.get(resourceDir);
+		this.engine = new Engine(factory);
 	}
 
 	public void generate() {
@@ -111,28 +84,34 @@ public class Generator {
 		for (File directory : dir.listFiles(DIRECTORIES)) {
 			createContentDocuments(node, directory);
 		}
-		STGroup contentSTGroup = new STGroupFile(resourcesPath.toString() + "/content.stg");
+		STGroup contentSTGroup = new STGroupFile(resourcesPath.toString()
+				+ "/content.stg");
 		for (File input : dir.listFiles(ADOC_FILES)) {
 			DocumentHeader header = engine.getHeader(input);
 			String contents = engine.render(input);
 
-			Path outPath = getOutputFilePath(input.toPath(), ".html");
-			Entry entry = new Entry(header.getDocumentTitle(),
-					outPath.toString());
-			Files.createDirectories(outPath.getParent());
+			Path outputFilePath = getOutputFilePath(input.toPath(), ".html");
+			Options options = new Options(outputPath,
+					header.getDocumentTitle(), outputFilePath.toString(),
+					contents);
+			Files.createDirectories(outputFilePath.getParent());
 
 			ST st = contentSTGroup.getInstanceOf("main");
-			st.add("opts", new Options(entry.title, entry.path, contents));
-			try (BufferedWriter writer = Files.newBufferedWriter(outPath,
-					Charset.forName("UTF-8"))) {
+			st.add("opts", options);
+			try (BufferedWriter writer = Files.newBufferedWriter(
+					outputFilePath, Charset.forName("UTF-8"))) {
 				writer.write(st.render());
 			}
-			node.entries.add(entry);
+			node.entries.add(options);
 		}
 
 		for (File input : dir.listFiles(REST)) {
-			Files.copy(input.toPath(),
-					outputPath.resolve(inputPath.relativize(input.toPath())));
+			Path destination = outputPath.resolve(inputPath.relativize(input
+					.toPath()));
+			if (Files.exists(destination)) {
+				Files.delete(destination);
+			}
+			Files.copy(input.toPath(), destination);
 		}
 	}
 
@@ -140,7 +119,6 @@ public class Generator {
 		String out = outputPath.resolve(inputPath.relativize(srcFile))
 				.toString();
 		out = out.substring(0, out.lastIndexOf(".")) + suffix;
-		Path outPath = Paths.get(out);
-		return outPath;
+		return Paths.get(out);
 	}
 }
