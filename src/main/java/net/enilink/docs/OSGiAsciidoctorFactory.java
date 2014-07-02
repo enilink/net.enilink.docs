@@ -3,13 +3,13 @@ package net.enilink.docs;
 import java.io.IOException;
 import java.net.URL;
 
-import net.enilink.docs.ant.DefaultAsciidcotorFactory;
+import net.enilink.docs.ant.DefaultAsciidoctorFactory;
 
 import org.asciidoctor.Asciidoctor;
 import org.eclipse.core.runtime.FileLocator;
 import org.osgi.framework.FrameworkUtil;
 
-public class OSGiAsciidoctorFactory extends DefaultAsciidcotorFactory {
+public class OSGiAsciidoctorFactory extends DefaultAsciidoctorFactory {
 
 	@Override
 	public Asciidoctor create() {

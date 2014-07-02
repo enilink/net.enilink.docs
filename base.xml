@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="net.enilink.docs" basedir=".">
 
-  	<dirname property="self" file="${ant.file.net.enilink.docs}"/>
-		
+	<dirname property="self" file="${ant.file.net.enilink.docs}" />
+
 	<path id="my-classpath">
 		<fileset dir="${self}/lib/">
 			<include name="*.jar" />
@@ -16,7 +16,7 @@
 	<target name="compile" depends="clean">
 		<mkdir dir="${self}/dist/classes" />
 		<javac includeantruntime="false" srcdir="${self}/src/main/java" destdir="${self}/dist/classes">
-		    <include name="net/enilink/docs/ant/*.java"/>
+			<include name="net/enilink/docs/ant/*.java" />
 			<classpath refid="my-classpath" />
 		</javac>
 	</target>
@@ -34,12 +34,9 @@
 			<classpath>
 				<pathelement location="${self}/dist/jar/docs.jar" />
 			</classpath>
-			<arg value="docs" />
-			<arg value="output" />
-			<arg value="resources" />
+			<arg value="${source}" />
+			<arg value="${output}" />
+			<arg value="${template}" />
 		</java>
-		<copy todir="output/assets">
-			<fileset dir="resources/assets" />
-		</copy>
 	</target>
 </project>

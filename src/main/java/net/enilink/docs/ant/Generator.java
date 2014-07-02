@@ -43,18 +43,18 @@ public class Generator {
 	private final Engine engine;
 	private final Path outputPath;
 	private final Path inputPath;
-	private final Path resourcesPath;
+	private final Path template;
 
 	public static void main(String[] args) {
 		new Generator(args[0], args[1], args[2],
-				new DefaultAsciidcotorFactory()).generate();
+				new DefaultAsciidoctorFactory()).generate();
 	}
 
-	public Generator(String inputDir, String outputDir, String resourceDir,
+	public Generator(String inputDir, String outputDir, String template,
 			IAsciidoctorFactory factory) {
 		this.inputPath = Paths.get(inputDir);
 		this.outputPath = Paths.get(outputDir);
-		this.resourcesPath = Paths.get(resourceDir);
+		this.template = Paths.get(template);
 		this.engine = new Engine(factory);
 	}
 
@@ -84,8 +84,7 @@ public class Generator {
 		for (File directory : dir.listFiles(DIRECTORIES)) {
 			createContentDocuments(node, directory);
 		}
-		STGroup contentSTGroup = new STGroupFile(resourcesPath.toString()
-				+ "/content.stg");
+		STGroup contentSTGroup = new STGroupFile(template.toString());
 		for (File input : dir.listFiles(ADOC_FILES)) {
 			DocumentHeader header = engine.getHeader(input);
 			String contents = engine.render(input);
